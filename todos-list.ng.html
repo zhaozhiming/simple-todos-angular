@@ -5,7 +5,10 @@
       <input type="checkbox" ng-model="$parent.hideCompleted"/>
       Hide Completed Tasks
     </label>
-    <form class="new-task" ng-submit="addTask(newTask); newTask='';">
+
+    <meteor-include src="loginButtons"></meteor-include>
+
+    <form class="new-task" ng-show="$root.currentUser" ng-submit="addTask(newTask); newTask='';">
       <input type="text" name="text" ng-model="newTask" placeholder="Type to add new tasks" />
     </form>
   </header>
@@ -14,7 +17,9 @@
     <li ng-class="{'checked': task.checked}">
       <button class="delete" ng-click="tasks.remove(task)">&times;</button>
       <input type="checkbox" ng-model="task.checked" class="toggle-checked"/>
-      <span class="text">{{task.text}}</span>
+      <span class="text">
+        <strong>{{task.username}} - {{task.text}}</strong>
+      </span>
     </li>
   </ul>
 </div>
