@@ -11,6 +11,8 @@ if (Meteor.isClient) {
   angular.module('simple-todos')
     .controller('TodosListCtrl', ['$scope', '$meteor',
     function ($scope, $meteor) {
+      $scope.$meteorSubscribe('tasks');
+
       $scope.tasks = $meteor.collection(function() {
         return Tasks.find($scope.getReactively('query'), { sort: { createdAt: -1 }});
       });
@@ -25,6 +27,10 @@ if (Meteor.isClient) {
 
       $scope.setChecked = function (task) {
         $meteor.call('setChecked', task._id, !task.checked);
+      };
+
+      $scope.setPrivate = function (task) {
+        $meteor.call('setPrivate', task._id, !task.private);
       };
 
       $scope.$watch('hideCompleted', function() {
@@ -59,6 +65,19 @@ Meteor.methods({
   },
   setChecked: function(taskId, setChecked) {
     Tasks.update(taskId, { $set: { checked: setChecked } });
+  },
+  setPrivate: function(taskId, setToPrivate) {
+    Tasks.update(taskId, { $set: { private: setToPrivate} });
   }
 });
 
+if (Meteor.isServer) {
+  Meteor.publish('tasks', function () {
+    return Tasks.find({
+      $or: [
+        {private: {$ne: true}},
+        {owner: this.userId}
+      ]
+    });
+  });
+}
